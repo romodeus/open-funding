@@ -65,6 +65,9 @@
        <li><a href="#high-level-architecture">High Level Architecture</a></li>
       </ul>
       <ul>
+        <li><a href="#erd">ERD</a></li>
+      </ul>
+      <ul>
         <li><a href="#api-documentation">API Documentation</a></li>
       </ul>
     </li>
@@ -137,6 +140,17 @@ This the tech stack that we used for developing Open Funding service
 <div align="center">
   <a href="https://drive.google.com/file/d/1fj3VTV65RnXKy032kT4l5ZWvpOijo46F/view?usp=sharing">
     <img src="https://i.ibb.co/gvqXRwR/High-Level-Diagram-drawio.png" alt="hla">
+  </a>
+</div>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+ <!-- ERD -->
+### ERD
+
+<br />
+<div align="center">
+  <a href="https://drive.google.com/file/d/1OvSa2I1hqA96DTOsK5sEkyaP4UvpQz3f/view?usp=sharing">
+    <img src="https://i.ibb.co/HVJFtvy/Open-Funding-ERD.jpg" alt="hla">
   </a>
 </div>
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
