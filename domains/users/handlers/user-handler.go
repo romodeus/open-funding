@@ -1,14 +1,16 @@
 package userhandler
 
 import (
-	entity "echo-boilerplate/domains/users/entities"
-	"echo-boilerplate/exceptions"
-	"echo-boilerplate/utils/helpers"
 	"errors"
 	"net/http"
+	entity "open-funding/domains/users/entities"
+	"open-funding/exceptions"
+	"open-funding/utils/helpers"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"open-funding/validation"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type userHandler struct {
@@ -21,38 +23,38 @@ func New(usecase entity.IusecaseUser) *userHandler {
 	}
 }
 
-func (h *userHandler) Store(c echo.Context) error {
+func (h *userHandler) Store(c *fiber.Ctx) error {
 	request := Request{}
-	err := c.Bind(&request)
+	err := c.BodyParser(&request)
 	if err != nil {
 		return errors.New(exceptions.BadRequestErrorMsg)
 	}
 
-	err = c.Validate(&request)
+	errResponse := validation.ValidateStruct(request)
 	if err != nil {
-		return err
+		c.Status(http.StatusBadRequest).JSON(helpers.FailedResponseData("bad request", errResponse))
 	}
 
 	h.Usecase.Store(RequestToEntity(request))
 
-	return c.JSON(http.StatusOK, helpers.SuccessGetResponse("success create data"))
+	return c.JSON(helpers.SuccessGetResponse("success create data"))
 }
 
-func (h *userHandler) Update(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+func (h *userHandler) Update(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
 	request := Request{}
 	if err != nil {
 		return errors.New(exceptions.BadRequestErrorMsg)
 	}
 
-	err = c.Bind(&request)
+	err = c.BodyParser(&request)
 	if err != nil {
 		return errors.New(exceptions.BadRequestErrorMsg)
 	}
 
-	err = c.Validate(request)
+	errResponse := validation.ValidateStruct(request)
 	if err != nil {
-		return err
+		c.Status(http.StatusBadRequest).JSON(helpers.FailedResponseData("bad request", errResponse))
 	}
 
 	userEntity := RequestToEntity(request)
@@ -60,31 +62,5 @@ func (h *userHandler) Update(c echo.Context) error {
 
 	h.Usecase.Update(userEntity)
 
-	return c.JSON(http.StatusOK, helpers.SuccessGetResponse("success update data"))
-}
-
-func (h *userHandler) Delete(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return errors.New(exceptions.BadRequestErrorMsg)
-	}
-
-	h.Usecase.Delete(entity.UserEntity{
-		UID: uint(id),
-	})
-
-	return c.JSON(http.StatusOK, helpers.SuccessGetResponse("success delete data"))
-}
-
-func (h *userHandler) GetById(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return errors.New(exceptions.BadRequestErrorMsg)
-	}
-
-	user := h.Usecase.GetById(entity.UserEntity{
-		UID: uint(id),
-	})
-
-	return c.JSON(http.StatusOK, helpers.SuccessGetResponseData("success get data", EntityToResponse(user)))
+	return c.Status(http.StatusOK).JSON(helpers.SuccessGetResponse("success update data"))
 }

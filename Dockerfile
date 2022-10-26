@@ -7,6 +7,6 @@ WORKDIR /app
 COPY . .
 
 RUN go mod tidy
-RUN go build -o echo-boilerplate
+RUN go build -o openfunding
 
-CMD ["./echo-boilerplate"]
+CMD ["./openfunding"]

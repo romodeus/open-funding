@@ -1,47 +1,42 @@
 package main
 
 import (
-	"echo-boilerplate/config"
-	"echo-boilerplate/exceptions"
+	"open-funding/config"
+	"open-funding/exceptions"
 
-	database "echo-boilerplate/utils/database/gorm-mysql"
+	database "open-funding/utils/database/postgre"
 
-	"echo-boilerplate/routes"
+	"open-funding/routes"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type CustomValidation struct {
 	validator *validator.Validate
 }
 
-func (cv *CustomValidation) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return err
-	}
-	return nil
-}
-
 func main() {
-	e := echo.New()
-	e.Validator = &CustomValidation{validator: validator.New()}
-	e.HTTPErrorHandler = exceptions.ExceptionHandler
-	e.Use(middleware.Recover())
+	app := fiber.New(fiber.Config{
+		ErrorHandler: exceptions.ExceptionHandler,
+	})
+	app.Use(recover.New())
 
 	cfg := config.GetConfig()
 	db := database.InitDB(cfg)
 
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+		AllowMethods: "GET,POST,HEAD,PUT,DELETE,PATCH",
 	}))
 
-	routes.InitRoutes(e, db, cfg)
+	routes.InitRoutes(app, db, cfg)
 
-	err := e.Start(":" + cfg.SERVER_PORT)
+	err := app.Listen(":" + cfg.SERVER_PORT)
 
 	if err != nil {
 		panic(err)

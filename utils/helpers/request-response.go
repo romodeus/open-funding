@@ -21,3 +21,11 @@ func FailedResponse(message string) map[string]interface{} {
 		"message": message,
 	}
 }
+
+func FailedResponseData(msg string, data interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"success": false,
+		"message": msg,
+		"data":    data,
+	}
+}

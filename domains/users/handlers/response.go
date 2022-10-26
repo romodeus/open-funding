@@ -1,7 +1,7 @@
 package userhandler
 
 import (
-	entity "echo-boilerplate/domains/users/entities"
+	entity "open-funding/domains/users/entities"
 )
 
 type Response struct {

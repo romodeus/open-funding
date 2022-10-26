@@ -1,22 +1,28 @@
 package middlewares
 
 import (
-	"echo-boilerplate/config"
 	"fmt"
-	"log"
+	"net/http"
+	"open-funding/config"
+	"strings"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
-func JWTMiddleware() echo.MiddlewareFunc {
-	cfg := config.GetConfig()
-	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: "HS256",
-		SigningKey:    []byte(cfg.JWT_SECRET),
-	})
+func JWTMiddleware(c *fiber.Ctx) error {
+	token, err := GetToken(c)
+	if err != nil {
+		return err
+	}
+
+	_, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return c.Status(http.StatusUnauthorized).JSON(err.Error())
+	}
+
+	return nil
 }
 
 func CreateToken(userID uint) (string, error) {
@@ -29,11 +35,37 @@ func CreateToken(userID uint) (string, error) {
 	return token.SignedString([]byte(cfg.JWT_SECRET))
 }
 
-func GetToken(c echo.Context) (int, error) {
-	token, ok := c.Get("user").(*jwt.Token)
+func GetToken(c *fiber.Ctx) (jwt.Token, error) {
+	cfg := config.GetConfig()
 
-	if !ok {
-		log.Fatal(ok)
+	authorizeHeader := c.GetRespHeader("Authorization")
+	if !strings.Contains(authorizeHeader, "Bearer") {
+		return jwt.Token{}, c.Status(http.StatusUnauthorized).JSON("failed authorization")
+	}
+
+	tokenString := strings.Replace(authorizeHeader, "Bearer ", "", -1)
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("signing method invalid")
+		} else if method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("signing method invalid")
+		}
+
+		return cfg.JWT_SECRET, nil
+	})
+
+	if err != nil {
+		return jwt.Token{}, c.Status(http.StatusUnauthorized).JSON(err.Error())
+	}
+
+	return *token, nil
+}
+
+func ExtractToken(c *fiber.Ctx) (int, error) {
+	token, err := GetToken(c)
+	if err != nil {
+		return 0, err
 	}
 
 	if token.Valid {

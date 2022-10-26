@@ -5,8 +5,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: ecommerceapp
-    image: ecommerceapp
+    container_name: openfunding
+    image: openfunding
     ports: 
       - ${SERVER_PORT}:${SERVER_PORT}
     environment:

@@ -1,9 +1,9 @@
 package userrepo
 
 import (
-	entity "echo-boilerplate/domains/users/entities"
-	model "echo-boilerplate/domains/users/models"
-	"echo-boilerplate/exceptions"
+	entity "open-funding/domains/users/entities"
+	model "open-funding/domains/users/models"
+	"open-funding/exceptions"
 )
 
 type userRepo struct {

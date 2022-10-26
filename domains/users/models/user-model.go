@@ -1,7 +1,7 @@
 package models
 
 import (
-	entity "echo-boilerplate/domains/users/entities"
+	entity "open-funding/domains/users/entities"
 
 	"gorm.io/gorm"
 )
